@@ -53,3 +53,7 @@ npm-debug.log*
 # Temp/Cache files
 .cache/
 tempCodeRunnerFile.*
+
+#test files
+inspect_models.py
+test_load.py
