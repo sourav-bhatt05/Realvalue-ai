@@ -1,0 +1,210 @@
+/* Dynamic Skyline Layered Background */
+.skyline-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 300px;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 2%,
+        black 98%,
+        transparent 100%
+    );
+}
+
+html.dark-theme .skyline-container {
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 10%,
+        black 90%,
+        transparent 100%
+    );
+}
+
+.skyline-layer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 200%; /* Important for seamless infinite loop */
+    height: 100%;
+    display: flex;
+    flex-direction: row; /* Puts the 2 SVGs side-by-side */
+    will-change: transform;
+}
+
+.skyline-layer svg {
+    flex-shrink: 0;
+}
+
+.stroke-far {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.2);
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
+
+.stroke-mid {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.45);
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
+
+
+
+.stroke-near {
+    fill: none;
+    stroke: rgba(0, 0, 0, 0.8);
+    stroke-linecap: square;
+    stroke-linejoin: miter;
+}
+
+html.dark-theme .stroke-far {
+    stroke: rgba(255, 255, 255, 0.2);
+}
+
+html.dark-theme .stroke-mid {
+    stroke: rgba(255, 255, 255, 0.45);
+}
+
+html.dark-theme .stroke-near {
+    stroke: rgba(255, 255, 255, 0.8);
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.3));
+}
+
+.skyline-searchlight {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    height: 100%;
+    background: linear-gradient(to top, rgba(0,0,0,0.06), transparent);
+    z-index: 5;
+    pointer-events: none;
+    will-change: transform;
+    display: none;
+}
+
+html.dark-theme .skyline-searchlight {
+    display: block;
+    background: linear-gradient(to top, rgba(255,255,255,0.04), transparent);
+}
+
+.skyline-ground {
+    position: absolute;
+    bottom: 1.5px;
+    left: 0;
+    width: 100%;
+    height: 1.5px;
+    background: rgba(0,0,0,0.8);
+    z-index: 4;
+}
+
+html.dark-theme .skyline-ground {
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 6px rgba(255, 255, 255, 0.3);
+}
+
+/* Stars Background */
+.skyline-stars {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+html.dark-theme .skyline-stars {
+    display: block;
+}
+
+.star {
+    position: absolute;
+    width: 1.5px;
+    height: 1.5px;
+    background-color: #000;
+    border-radius: 50%;
+    animation: twinkle 4s ease-in-out infinite;
+}
+
+html.dark-theme .star {
+    background-color: #fff;
+    box-shadow: 0 0 3px rgba(255,255,255,0.8);
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* Horizon glow */
+.horizon-glow {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 400px;
+    z-index: 0;
+    pointer-events: none;
+    background: transparent;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+}
+
+html.dark-theme .horizon-glow {
+    opacity: 1;
+    background: radial-gradient(ellipse 80% 30% at 50% 100%, rgba(124, 58, 237, 0.08) 0%, transparent 70%);
+}
+
+/* Navbar Mini Skyline Extension */
+.navbar-skyline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+    opacity: 0.15;
+    mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 5%,
+        black 95%,
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        transparent 0%,
+        black 5%,
+        black 95%,
+        transparent 100%
+    );
+}
+
+html.dark-theme .navbar-skyline {
+    opacity: 0.4;
+}

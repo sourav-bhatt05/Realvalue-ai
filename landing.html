@@ -1,0 +1,1558 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealValue AI — AI-Powered Real Estate Analytics</title>
+    <meta name="description"
+        content="Analyze any property instantly with AI. Get price predictions, rental yields, and investment intelligence for smarter real estate decisions.">
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="skyline.css">
+
+    <!-- Pre-render theme syncing -->
+    <script>
+        if (localStorage.getItem('realvalue-theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --font-primary: 'Plus Jakarta Sans', sans-serif;
+            --font-data: 'DM Mono', monospace;
+
+            /* Light theme (default) */
+            --bg-page: #FAFAFA;
+            --bg-card: #FFFFFF;
+            --bg-card-alt: #F2F2F5;
+            --bg-mockup-inner: #F8F8F8;
+            --text-main: #222222;
+            --text-muted: #4e4e4e;
+            --text-dim: #777777;
+            --border-subtle: rgba(0, 0, 0, 0.08);
+            --border-glow: rgba(0, 0, 0, 0.12);
+            --shadow-glow: 0 40px 80px rgba(0, 0, 0, 0.10);
+            --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.08);
+            --badge-bg: rgba(0, 0, 0, 0.04);
+            --badge-text: #222222;
+            --ghost-text: #111111;
+            --ghost-hover-bg: rgba(0, 0, 0, 0.12);
+            --glow-color: rgba(0, 0, 0, 0.015);
+
+            /* Brand constants */
+            --coral: #111111;
+            --purple: #333333;
+            --teal: #333333;
+            --gold: #666666;
+            --gradient-accent: linear-gradient(135deg, #111111, #333333);
+            --radius-pill: 32px;
+            --radius-card: 20px;
+            --radius-sm: 12px;
+        }
+
+        /* Dark theme */
+        html.dark-theme {
+            --bg-page: #0a0a0a;
+            --bg-card: #121212;
+            --bg-card-alt: #1a1a1a;
+            --bg-mockup-inner: #0d0d0d;
+            --text-main: #FFFFFF;
+            --text-muted: #a0a0a0;
+            --text-dim: #666666;
+            --border-subtle: rgba(255, 255, 255, 0.08);
+            --border-glow: rgba(255, 255, 255, 0.15);
+            --shadow-glow: 0 40px 80px rgba(255, 255, 255, 0.06);
+            --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.3);
+            --badge-bg: rgba(255, 255, 255, 0.06);
+            --badge-text: #e0e0e0;
+            --ghost-text: #FFFFFF;
+            --ghost-hover-bg: rgba(255, 255, 255, 0.1);
+            --glow-color: rgba(255, 255, 255, 0.02);
+
+            --coral: #FFFFFF;
+            --purple: #CCCCCC;
+            --gradient-accent: linear-gradient(135deg, #E0E0E0, #888888);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-primary);
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+            transition: background-color 0.4s, color 0.4s;
+        }
+
+        html.dark-theme body {
+            background-image: radial-gradient(circle at 75% 30%, #1a1a1a 0%, #0a0a0a 70%);
+        }
+
+        .data-font {
+            font-family: var(--font-data);
+        }
+
+        /* ===== NAVIGATION ===== */
+        .landing-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 60px;
+            height: 72px;
+            background: var(--bg-page);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            transition: background-color 0.4s;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        .nav-left-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .nav-logo i {
+            font-size: 24px;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-logo span {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: -0.5px;
+            transition: color 0.4s;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 36px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 15px;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text-main);
+        }
+
+        .nav-right-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .theme-btn {
+            background: transparent;
+            border: 1px solid var(--border-subtle);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.2s, color 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .theme-btn:hover {
+            background: var(--ghost-hover-bg);
+            color: var(--text-main);
+        }
+
+        .nav-cta {
+            background: var(--gradient-accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 10px 28px;
+            border-radius: var(--radius-pill);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            text-decoration: none;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .nav-cta:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+        }
+
+        /* ===== HERO SECTION ===== */
+        .hero {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 60px 60px 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+            gap: 60px;
+            min-height: calc(100vh - 72px);
+        }
+
+        .hero-left {
+            flex: 0 0 45%;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+            position: relative;
+            z-index: 10;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 18px;
+            background: var(--badge-bg);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-pill);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--badge-text);
+            width: fit-content;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.1s;
+        }
+
+        .hero-badge i {
+            color: var(--gold);
+            font-size: 12px;
+        }
+
+        .hero-headline {
+            font-size: 72px;
+            font-weight: 800;
+            line-height: 1.05;
+            letter-spacing: -2px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.25s;
+        }
+
+        .hero-headline .gradient-word {
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-sub {
+            font-size: 17px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            max-width: 480px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.4s;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.55s;
+        }
+
+        .btn-primary {
+            background: var(--gradient-accent);
+            color: #FFFFFF;
+            border: none;
+            padding: 16px 32px;
+            border-radius: var(--radius-pill);
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+        }
+
+        html.dark-theme .btn-primary,
+        html.dark-theme .nav-cta {
+            color: #111111;
+        }
+
+        .btn-ghost {
+            background: rgba(0, 0, 0, 0.08);
+            color: var(--ghost-text);
+            border: 1px solid rgba(0, 0, 0, 0.2);
+            padding: 16px 32px;
+            border-radius: var(--radius-pill);
+            font-size: 16px;
+            font-weight: 600;
+            font-family: var(--font-primary);
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s, color 0.4s;
+        }
+
+        .btn-ghost:hover {
+            background: var(--ghost-hover-bg);
+            border-color: rgba(0, 0, 0, 0.2);
+        }
+
+        html.dark-theme .btn-ghost {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        html.dark-theme .btn-ghost:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Social proof */
+        .social-proof {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.7s;
+        }
+
+        .avatar-stack {
+            display: flex;
+        }
+
+        .avatar-circle {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 700;
+            color: white;
+            border: 2px solid var(--bg-page);
+            margin-left: -10px;
+            transition: border-color 0.4s;
+        }
+
+        .avatar-circle:first-child {
+            margin-left: 0;
+        }
+
+        .social-text {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .social-text strong {
+            color: var(--text-main);
+            font-weight: 700;
+        }
+
+
+        /* --- Right: Dashboard Mockup --- */
+        .hero-right {
+            flex: 0 0 52%;
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .glow-orb {
+            position: absolute;
+            right: -250px;
+            top: -100px;
+            width: 700px;
+            height: 700px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-color) 0%, transparent 55%);
+            z-index: 0;
+            animation: pulseGlow 4s ease-in-out infinite;
+        }
+
+        .mockup-card {
+            position: relative;
+            z-index: 1;
+            background: var(--bg-card-alt);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            box-shadow: var(--shadow-glow);
+            width: 100%;
+            max-width: 520px;
+            overflow: hidden;
+            opacity: 0;
+            animation: floatUp 3.5s ease-in-out infinite, fadeUp 0.8s ease both 0.3s;
+            transition: background-color 0.4s, border-color 0.4s, box-shadow 0.4s;
+        }
+
+        .mockup-browser-bar {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 18px;
+            background: #e5e5e5;
+            border-bottom: 1px solid var(--border-subtle);
+        }
+
+        html.dark-theme .mockup-browser-bar {
+            background: #222222;
+        }
+
+        .browser-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .browser-dot.red {
+            background: #ff5f57;
+        }
+
+        .browser-dot.yellow {
+            background: #ffbd2e;
+        }
+
+        .browser-dot.green {
+            background: #28c840;
+        }
+
+        .browser-bar-title {
+            font-size: 12px;
+            color: var(--text-dim);
+            margin-left: 8px;
+            font-weight: 500;
+        }
+
+        .mockup-body {
+            padding: 20px;
+        }
+
+        .mockup-location {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .mockup-location i {
+            color: var(--coral);
+            font-size: 14px;
+        }
+
+        .mockup-specs {
+            font-size: 13px;
+            color: var(--text-dim);
+            margin-top: 4px;
+        }
+
+        .mockup-property-header {
+            margin-bottom: 16px;
+        }
+
+        .mockup-main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .mockup-map-area {
+            background: var(--bg-mockup-inner);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            min-height: 120px;
+            transition: background-color 0.4s;
+        }
+
+        .heat-dot {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.6;
+            filter: blur(4px);
+        }
+
+        .mockup-map-label {
+            position: absolute;
+            bottom: 10px;
+            left: 12px;
+            font-size: 10px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .mockup-score-area {
+            background: var(--bg-mockup-inner);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background-color 0.4s;
+        }
+
+        .score-label {
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        .score-ring {
+            position: relative;
+            width: 80px;
+            height: 80px;
+        }
+
+        .score-ring svg {
+            transform: rotate(-90deg);
+            width: 80px;
+            height: 80px;
+        }
+
+        .score-ring .ring-bg {
+            fill: none;
+            stroke: var(--border-subtle);
+            stroke-width: 6;
+        }
+
+        .score-ring .ring-fill {
+            fill: none;
+            stroke: url(#scoreGradient);
+            stroke-width: 6;
+            stroke-linecap: round;
+            stroke-dasharray: 226;
+            stroke-dashoffset: 226;
+            transition: stroke-dashoffset 1.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .score-number {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: var(--font-data);
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .score-sub {
+            font-family: var(--font-data);
+            font-size: 11px;
+            font-weight: 500;
+            color: var(--text-dim);
+        }
+
+        .mockup-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-subtle);
+            margin-bottom: 16px;
+        }
+
+        .mtab {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-dim);
+            position: relative;
+        }
+
+        .mtab.active {
+            color: var(--text-main);
+        }
+
+        .mtab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            left: 20%;
+            width: 60%;
+            height: 2px;
+            background: var(--gradient-accent);
+            border-radius: 1px;
+        }
+
+        .mockup-prediction {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .mockup-price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mockup-price-label {
+            font-size: 12px;
+            color: var(--text-dim);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .mockup-price-val {
+            font-family: var(--font-data);
+            font-size: 24px;
+            font-weight: 700;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .mockup-conf {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .mockup-conf-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--text-dim);
+            font-weight: 600;
+        }
+
+        .mockup-conf-bar-bg {
+            height: 6px;
+            background: var(--border-subtle);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .mockup-conf-bar-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--gradient-accent);
+            border-radius: 3px;
+            transition: width 1.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .breakout-card {
+            position: absolute;
+            top: -16px;
+            right: -30px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            padding: 16px 22px;
+            box-shadow: var(--shadow-card);
+            z-index: 5;
+            opacity: 0;
+            animation: fadeUp 0.6s ease both 0.8s, floatUp 4s ease-in-out infinite 0.8s;
+            transition: background-color 0.4s, border-color 0.4s;
+        }
+
+        .breakout-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-dim);
+            margin-bottom: 6px;
+        }
+
+        .breakout-score {
+            font-family: var(--font-data);
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .breakout-score span {
+            font-size: 16px;
+            color: var(--text-dim);
+            font-weight: 500;
+        }
+
+        .breakout-trend {
+            font-size: 12px;
+            color: var(--teal);
+            font-weight: 600;
+            margin-top: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .insight-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border-subtle);
+        }
+
+        .insight-tags-label {
+            width: 100%;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1.2px;
+            color: var(--text-dim);
+            margin-bottom: 2px;
+        }
+
+        .itag {
+            padding: 6px 14px;
+            background: var(--ghost-hover-bg);
+            border: 1px solid var(--border-subtle);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            opacity: 0;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .itag:nth-child(2) {
+            animation-delay: 1.0s;
+        }
+
+        .itag:nth-child(3) {
+            animation-delay: 1.15s;
+        }
+
+        .itag:nth-child(4) {
+            animation-delay: 1.3s;
+        }
+
+        .itag:nth-child(5) {
+            animation-delay: 1.45s;
+        }
+
+
+        /* ===== CONTENT SECTIONS ===== */
+        .section {
+            padding: 80px 60px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 56px;
+        }
+
+        .section-label {
+            font-size: 13px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 12px;
+        }
+
+        .section-title {
+            font-size: 40px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 16px;
+        }
+
+        .section-sub {
+            font-size: 17px;
+            color: var(--text-muted);
+            max-width: 560px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .section-divider {
+            border: none;
+            height: 1px;
+            background: var(--border-subtle);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .feature-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            padding: 32px 28px;
+            transition: transform 0.3s, box-shadow 0.3s, background-color 0.4s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-6px);
+            box-shadow: var(--shadow-card);
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .feature-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* How it Works */
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 32px;
+            position: relative;
+        }
+
+        .step-card {
+            text-align: center;
+            padding: 24px;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--gradient-accent);
+            color: #FFFFFF;
+            font-size: 22px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-family: var(--font-data);
+        }
+
+        .step-card h3 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .step-card p {
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* Reviews */
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 28px;
+        }
+
+        .review-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-card);
+            padding: 28px;
+            transition: background-color 0.4s;
+        }
+
+        .review-stars {
+            color: var(--gold);
+            font-size: 14px;
+            margin-bottom: 16px;
+            display: flex;
+            gap: 3px;
+        }
+
+        .review-text {
+            font-size: 15px;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 20px;
+            font-style: italic;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .review-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .review-name {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-main);
+        }
+
+        .review-role {
+            font-size: 12px;
+            color: var(--text-dim);
+        }
+
+        /* Footer */
+        .landing-footer {
+            border-top: 1px solid var(--border-subtle);
+            padding: 32px 60px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        .landing-footer p {
+            font-size: 13px;
+            color: var(--text-dim);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 24px;
+        }
+
+        .footer-links a {
+            font-size: 13px;
+            color: var(--text-dim);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-main);
+        }
+
+
+        /* ===== KEYFRAME ANIMATIONS ===== */
+        @keyframes fadeUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes floatUp {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+
+        @keyframes pulseGlow {
+
+            0%,
+            100% {
+                opacity: 0.5;
+                transform: scale(1);
+            }
+
+            50% {
+                opacity: 0.8;
+                transform: scale(1.08);
+            }
+        }
+
+        /* Logo theme swap */
+        html.dark-theme .logo-light {
+            display: none !important;
+        }
+
+        html.dark-theme .logo-dark {
+            display: inline-block !important;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 1024px) {
+            .hero {
+                flex-direction: column;
+                padding: 40px 32px;
+                gap: 48px;
+            }
+
+            .hero-left,
+            .hero-right {
+                flex: none;
+                width: 100%;
+            }
+
+            .hero-headline {
+                font-size: 48px;
+            }
+
+            .landing-nav {
+                padding: 0 32px;
+            }
+
+            .breakout-card {
+                right: 0;
+            }
+
+            .features-grid,
+            .steps-grid,
+            .reviews-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .section {
+                padding: 60px 32px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .hero-headline {
+                font-size: 36px;
+                letter-spacing: -1px;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            .nav-links {
+                display: none;
+            }
+
+            .landing-nav {
+                padding: 0 20px;
+            }
+
+            .hero {
+                padding: 32px 20px;
+            }
+
+            .section {
+                padding: 48px 20px;
+            }
+
+            .landing-footer {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== NAVIGATION ===== -->
+    <nav class="landing-nav">
+        <div class="nav-left-group">
+            <a href="#" class="nav-logo">
+                <img src="RealValueLogo-light.png" alt="RealValue" class="logo-light" style="height:52px;">
+                <img src="RealValueLogo.png" alt="RealValue" class="logo-dark" style="height:52px; display:none;">
+            </a>
+        </div>
+        <ul class="nav-links">
+            <li><a href="#features">Features</a></li>
+            <li><a href="#how-it-works">How it works</a></li>
+            <li><a href="#reviews">Reviews</a></li>
+        </ul>
+        <div class="nav-right-group">
+            <button class="theme-btn" id="landing-theme-toggle" title="Toggle Theme">
+                <i class="fas fa-moon"></i>
+            </button>
+            <a href="index.html" class="nav-cta">Dashboard →</a>
+        </div>
+    </nav>
+
+
+    <!-- ===== HERO SECTION ===== -->
+    <section class="hero" id="hero">
+
+        <!-- City Skyline Background -->
+        <div class="horizon-glow"></div>
+        <div id="skyline-container" class="skyline-container" aria-hidden="true"></div>
+        <div class="hero-left">
+            <div class="hero-badge">
+                <i class="fas fa-sparkles"></i>
+                AI-powered real estate analytics
+            </div>
+
+            <div
+                style="display:flex; gap:16px; font-size:13px; font-weight:600; color:var(--text-muted); letter-spacing:2px; text-transform:uppercase;">
+                <span>Predict</span>
+                <span style="opacity:0.3;">•</span>
+                <span>Analyze</span>
+                <span style="opacity:0.3;">•</span>
+                <span>Invest</span>
+            </div>
+            <h1 class="hero-headline">
+                Your property,<br>
+                <span class="gradient-word">valued with</span><br>
+                AI precision.
+            </h1>
+            <p class="hero-sub">
+                Analyze any property and get instant price predictions,
+                rental yield estimates, and investment intelligence
+                that helps you make smarter real estate decisions.
+            </p>
+            <div class="hero-buttons">
+                <a href="index.html" class="btn-primary">
+                    Analyze a Property <i class="fas fa-arrow-right"></i>
+                </a>
+                <a href="index.html" class="btn-primary">Sign in</a>
+            </div>
+            <div class="social-proof">
+                <div class="avatar-stack">
+                    <div class="avatar-circle" style="background:#777;">R</div>
+                    <div class="avatar-circle" style="background:#333;">S</div>
+                    <div class="avatar-circle" style="background:#555;">A</div>
+                    <div class="avatar-circle" style="background:#999;">R</div>
+                    <div class="avatar-circle" style="background:#444;">P</div>
+                    <div class="avatar-circle" style="background:#666;">M</div>
+                </div>
+                <div class="social-text">
+                    <strong>50,000+</strong> analysts have predicted<br>
+                    property values with RealValue
+                </div>
+            </div>
+        </div>
+
+        <div class="hero-right">
+            <div class="glow-orb"></div>
+            <div class="breakout-card">
+                <div class="breakout-label">Investment Score</div>
+                <div class="breakout-score" id="breakout-score-num">0<span> /10</span></div>
+                <div class="breakout-trend"><i class="fas fa-arrow-trend-up"></i> +1.4 vs avg</div>
+            </div>
+            <div class="mockup-card">
+                <div class="mockup-browser-bar">
+                    <div class="browser-dot red"></div>
+                    <div class="browser-dot yellow"></div>
+                    <div class="browser-dot green"></div>
+                    <span class="browser-bar-title"><img src="RealValueLogo-light.png" alt="RealValue"
+                            class="logo-light" style="height:20px; vertical-align:middle;"><img src="RealValueLogo.png"
+                            alt="RealValue" class="logo-dark"
+                            style="height:20px; vertical-align:middle; display:none;"></span>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-property-header">
+                        <div class="mockup-location"><i class="fas fa-map-marker-alt"></i> Connaught Place, New Delhi
+                        </div>
+                        <div class="mockup-specs">3BHK · 1,450 sq.ft · Semi-Furnished · Ready to Move</div>
+                    </div>
+                    <div class="mockup-main-grid">
+                        <div class="mockup-map-area" style="padding:0; overflow:hidden;">
+                            <img src="https://mt1.google.com/vt/lyrs=s&x=5741&y=3269&z=13" alt="Satellite Map - Delhi"
+                                style="width:100%;height:100%;object-fit:cover;display:block;opacity:0.85;">
+                            <i class="fas fa-map-marker-alt"
+                                style="position:absolute;top:50%;left:50%;transform:translate(-50%,-100%);font-size:28px;color:var(--coral);filter:drop-shadow(0 3px 6px rgba(0,0,0,0.4));animation:pinBounce 2s ease-in-out infinite;"></i>
+                            <div class="mockup-map-label"><i class="fas fa-satellite"
+                                    style="margin-right:4px;color:var(--coral);"></i> Satellite View</div>
+                        </div>
+                        <div class="mockup-score-area">
+                            <div class="score-label">Inv. Score</div>
+                            <div class="score-ring">
+                                <svg viewBox="0 0 80 80">
+                                    <defs>
+                                        <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                            <stop offset="0%" stop-color="#111111" />
+                                            <stop offset="100%" stop-color="#555555" />
+                                        </linearGradient>
+                                    </defs>
+                                    <circle class="ring-bg" cx="40" cy="40" r="36" />
+                                    <circle class="ring-fill" id="score-ring-fill" cx="40" cy="40" r="36" />
+                                </svg>
+                                <div class="score-number data-font" id="score-display">0</div>
+                            </div>
+                            <div class="score-sub data-font">out of 10</div>
+                        </div>
+                    </div>
+                    <div class="mockup-tabs">
+                        <div class="mtab active">Price Prediction</div>
+                        <div class="mtab">Rental</div>
+                        <div class="mtab">ROI</div>
+                    </div>
+                    <div class="mockup-prediction">
+                        <div class="mockup-price-row">
+                            <div class="mockup-price-label">Predicted Price</div>
+                            <div class="mockup-price-val" id="mockup-price">₹0</div>
+                        </div>
+                        <div class="mockup-conf">
+                            <div class="mockup-conf-header">
+                                <span>CONFIDENCE</span>
+                                <span class="data-font" id="conf-pct">0%</span>
+                            </div>
+                            <div class="mockup-conf-bar-bg">
+                                <div class="mockup-conf-bar-fill" id="conf-bar-fill"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="insight-tags">
+                        <div class="insight-tags-label">Insights Matched</div>
+                        <div class="itag"><i class="fas fa-chart-line" style="color:var(--text-muted);"></i> High Growth
+                        </div>
+                        <div class="itag"><i class="fas fa-train-subway" style="color:var(--text-muted);"></i> New Metro
+                        </div>
+                        <div class="itag"><i class="fas fa-coins" style="color:var(--text-muted);"></i> Good Yield</div>
+                        <div class="itag"><i class="fas fa-shield-halved" style="color:var(--text-muted);"></i> Low Risk
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== FEATURES ===== -->
+    <hr class="section-divider">
+    <section class="section" id="features">
+        <div class="section-header">
+            <div class="section-label">Features</div>
+            <h2 class="section-title">Everything you need to invest smarter</h2>
+            <p class="section-sub">From instant valuations to deep investment intelligence — all powered by machine
+                learning models trained on real Indian real estate data.</p>
+        </div>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Instant Price Prediction</h3>
+                <p>Get accurate sale price estimates in seconds using ML models trained on thousands of Delhi NCR
+                    transactions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-indian-rupee-sign"></i>
+                </div>
+                <h3>Rental Yield Analysis</h3>
+                <p>Predict monthly rental income and calculate gross yield to evaluate income-generating potential of
+                    any property.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3>Investment Intelligence</h3>
+                <p>5-year ROI projections, EMI calculations, break-even analysis, and AI-generated investment insights.
+                </p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-map-location-dot"></i>
+                </div>
+                <h3>Interactive Heatmaps</h3>
+                <p>Visualize price intensity across neighborhoods with dynamic, layered map overlays on satellite or
+                    standard views.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-draw-polygon"></i>
+                </div>
+                <h3>Draw & Measure Land</h3>
+                <p>Draw polygon boundaries directly on the map to auto-calculate area in sq.ft. and pin precise
+                    coordinates.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon" style="background:rgba(0,0,0,0.05); color:var(--text-main);">
+                    <i class="fas fa-clock-rotate-left"></i>
+                </div>
+                <h3>Prediction History</h3>
+                <p>Track and compare all your past property analyses with full detail — location, specs, and predicted
+                    price.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== HOW IT WORKS ===== -->
+    <hr class="section-divider">
+    <section class="section" id="how-it-works">
+        <div class="section-header">
+            <div class="section-label">How it works</div>
+            <h2 class="section-title">Three steps to smarter investing</h2>
+            <p class="section-sub">No sign-ups, no credit cards. Just pick a spot on the map, fill in the details, and
+                let our AI do the rest.</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Select a Location</h3>
+                <p>Click anywhere on the interactive Delhi NCR map, or search for a specific locality. The location
+                    auto-fills coordinates and the nearest address.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Enter Property Details</h3>
+                <p>Specify BHK, area, furnishing, property type, and status. The area auto-fills based on BHK selection
+                    — but you can adjust it anytime.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Get AI Predictions</h3>
+                <p>Hit "Analyze" and receive instant price predictions, rental estimates, investment scores, and
+                    AI-generated insights — all in real time.</p>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== REVIEWS ===== -->
+    <hr class="section-divider">
+    <section class="section" id="reviews">
+        <div class="section-header">
+            <div class="section-label">Reviews</div>
+            <h2 class="section-title">Loved by investors across India</h2>
+            <p class="section-sub">Here's what our users say about making real estate decisions with RealValue AI.</p>
+        </div>
+        <div class="reviews-grid">
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="review-text">"I used RealValue to evaluate a 3BHK in Saket before buying. The predicted price
+                    was within 4% of what I negotiated. Incredibly accurate."</p>
+                <div class="review-author">
+                    <div class="review-avatar" style="background:#222;">R</div>
+                    <div>
+                        <div class="review-name">Rahul Sharma</div>
+                        <div class="review-role">Software Engineer, Google</div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star"></i>
+                </div>
+                <p class="review-text">"The investment intelligence tab alone is worth it. Break-even analysis, yield
+                    calculations — things that used to take me hours in Excel."</p>
+                <div class="review-author">
+                    <div class="review-avatar" style="background:#444;">P</div>
+                    <div>
+                        <div class="review-name">Priya Mehta</div>
+                        <div class="review-role">Real Estate Analyst, HDFC</div>
+                    </div>
+                </div>
+            </div>
+            <div class="review-card">
+                <div class="review-stars">
+                    <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i
+                        class="fas fa-star"></i><i class="fas fa-star-half-stroke"></i>
+                </div>
+                <p class="review-text">"I love how I can just draw a polygon on the map and it calculates the plot area
+                    instantly. The heatmap layer is a brilliant touch for area analysis."</p>
+                <div class="review-author">
+                    <div class="review-avatar" style="background:#666;">A</div>
+                    <div>
+                        <div class="review-name">Amit Verma</div>
+                        <div class="review-role">Property Investor, Mumbai</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="landing-footer">
+        <p>© 2026 RealValue AI. Built with ML & ❤️ in India.</p>
+        <div class="footer-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#reviews">Reviews</a>
+            <a href="index.html">Dashboard</a>
+        </div>
+    </footer>
+
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="skyline.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize dynamic skyline
+            initSkyline('skyline-container');
+
+            // === Theme Toggle (synced with dashboard) ===
+            const themeBtn = document.getElementById('landing-theme-toggle');
+
+            // Check if dark theme was set on the dashboard (via localStorage)
+            if (document.documentElement.classList.contains('dark-theme')) {
+                themeBtn.innerHTML = '<i class="fas fa-sun"></i>';
+            }
+
+            themeBtn.addEventListener('click', () => {
+                document.documentElement.classList.toggle('dark-theme');
+                const isDark = document.documentElement.classList.contains('dark-theme');
+                themeBtn.innerHTML = isDark ? '<i class="fas fa-sun"></i>' : '<i class="fas fa-moon"></i>';
+                localStorage.setItem('realvalue-theme', isDark ? 'dark' : 'light');
+            });
+
+            // === Animate Investment Score Ring & Number ===
+            const targetScore = 8.2;
+            const circumference = 2 * Math.PI * 36;
+            const percent = targetScore / 10;
+            const offset = circumference * (1 - percent);
+
+            setTimeout(() => {
+                document.getElementById('score-ring-fill').style.strokeDashoffset = offset;
+                animateCounter('score-display', 0, targetScore, 1500, 1);
+                animateCounter('breakout-score-num', 0, targetScore, 1500, 1, ' /10');
+            }, 900);
+
+            // === Animate Confidence Bar & Percentage ===
+            setTimeout(() => {
+                document.getElementById('conf-bar-fill').style.width = '92%';
+                animateCounter('conf-pct', 0, 92, 1400, 0, '%');
+            }, 1200);
+
+            // === Animate Price Counter ===
+            setTimeout(() => {
+                animatePrice('mockup-price', 8540000, 1600);
+            }, 1000);
+
+            // === Scroll reveal for sections ===
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            document.querySelectorAll('.feature-card, .step-card, .review-card').forEach((el, i) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(24px)';
+                el.style.transition = `opacity 0.5s ease ${i * 0.08}s, transform 0.5s ease ${i * 0.08}s`;
+                observer.observe(el);
+            });
+        });
+
+        function animateCounter(id, start, end, duration, decimals, suffix = '') {
+            const el = document.getElementById(id);
+            const startTime = performance.now();
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = start + (end - start) * easeOut;
+                if (suffix === ' /10') {
+                    el.innerHTML = `${current.toFixed(decimals)}<span> /10</span>`;
+                } else {
+                    el.innerText = current.toFixed(decimals) + suffix;
+                }
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+
+        function animatePrice(id, target, duration) {
+            const el = document.getElementById(id);
+            const startTime = performance.now();
+            function update(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const easeOut = 1 - Math.pow(1 - progress, 3);
+                const current = Math.floor(target * easeOut);
+                el.innerText = '₹' + current.toLocaleString('en-IN');
+                if (progress < 1) requestAnimationFrame(update);
+            }
+            requestAnimationFrame(update);
+        }
+    </script>
+
+</body>
+
+</html>

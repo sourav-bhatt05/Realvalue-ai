@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RealValue - AI Real Estate Analytics</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.css" />
+
+    <!-- Leaflet Heatmap JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="skyline.css">
+
+    <!-- Pre-render theme syncing -->
+    <script>
+        if (localStorage.getItem('realvalue-theme') === 'dark') {
+            document.documentElement.classList.add('dark-theme');
+        }
+    </script>
+</head>
+
+<body class="light-theme">
+    <!-- Skyline & Horizon Glow Background -->
+    <div class="horizon-glow"></div>
+    <div id="skyline-container" class="skyline-container" aria-hidden="true" style="position: fixed; z-index: 0;"></div>
+
+    <!-- Login Overlay -->
+    <div id="login-overlay" class="login-overlay">
+        <div class="login-modal">
+            <div class="login-header">
+                <img src="RealValueLogo-light.png" alt="RealValue" class="logo-light" style="height:44px;">
+                <img src="RealValueLogo.png" alt="RealValue" class="logo-dark" style="height:44px; display:none;">
+                <h2 style="margin-top: 12px; font-size: 24px; color: var(--text-main);">Welcome to RealValue AI</h2>
+                <p style="color: var(--text-muted); font-size: 14px; margin-top: 8px;">Please log in to access the
+                    analytics dashboard.</p>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="input-field">
+                    <label>Email Address</label>
+                    <input type="email" id="login-email" placeholder="investor@realvalue.ai" required>
+                </div>
+                <div class="input-field" style="margin-top: 16px;">
+                    <label>Password</label>
+                    <input type="password" id="login-password" placeholder="••••••••" required>
+                </div>
+
+                <button type="submit" class="cta-primary" id="login-btn" style="margin-top: 24px;">
+                    <span class="cta-text">Sign In</span>
+                    <div class="shimmer-loader hidden" id="login-loader"></div>
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <a href="#"
+                    style="color: var(--brand-coral); font-size: 13px; text-decoration: none; font-weight: 500;">Forgot
+                    Password?</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div id="toast-container"></div>
+
+    <!-- Top Navigation (Airbnb Style) -->
+    <nav class="navbar">
+        <!-- Mini Skyline Background -->
+        <div id="navbar-skyline-container" class="navbar-skyline" aria-hidden="true"></div>
+
+        <div class="nav-left">
+            <div class="logo-container">
+                <img src="RealValueLogo-light.png" alt="RealValue" class="brand-logo-img logo-light"
+                    style="height:48px;">
+                <img src="RealValueLogo.png" alt="RealValue" class="brand-logo-img logo-dark"
+                    style="height:48px; display:none;">
+            </div>
+        </div>
+
+        <div class="nav-center">
+            <div class="brand-tagline">
+                <span>Predict</span> <span>Analyze</span> <span>Invest</span>
+            </div>
+        </div>
+
+        <div class="nav-right">
+            <button class="icon-action" title="Toggle Theme" id="theme-toggle">
+                <i class="fas fa-moon"></i>
+            </button>
+            <button class="icon-action" title="Save Location" id="save-btn">
+                <i class="far fa-heart"></i>
+            </button>
+            <button class="icon-action" title="Export Report" id="export-btn">
+                <i class="fas fa-arrow-up-from-bracket"></i>
+            </button>
+            <div class="user-menu-wrapper" style="position: relative;">
+                <button class="user-menu" id="user-menu-btn">
+                    <i class="fas fa-bars"></i>
+                    <img src="https://ui-avatars.com/api/?name=SB&background=111111&color=fff" alt="Sourav Bhatt"
+                        class="avatar">
+                </button>
+                <div class="user-dropdown" id="user-dropdown">
+                    <a href="#" onclick="showToast('Loading Profile...')"><i class="fas fa-user" style="width:20px"></i>
+                        Profile</a>
+                    <a href="#" onclick="showToast('Loading Settings...')"><i class="fas fa-cog" style="width:20px"></i>
+                        Settings</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="#" id="logout-btn" class="text-danger"><i class="fas fa-sign-out-alt"
+                            style="width:20px"></i> Log Out</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Workspace -->
+    <main class="workspace">
+
+        <!-- Left Panel: Interactive Map (65-70%) -->
+        <section class="map-section">
+            <div id="map"></div>
+
+            <!-- Floating Map UI -->
+            <div class="map-floating-search glass-panel">
+                <i class="fas fa-search"></i>
+                <input type="text" id="map-search-input" placeholder="Search Delhi NCR locations...">
+                <div id="search-results-dropdown" class="search-dropdown hidden"></div>
+            </div>
+
+            <div class="map-controls">
+                <button class="map-btn map-tool" title="Zoom In" id="zoom-in"><i class="fas fa-plus"></i></button>
+                <button class="map-btn map-tool" title="Zoom Out" id="zoom-out"><i class="fas fa-minus"></i></button>
+                <div class="map-divider"></div>
+                <button class="map-btn map-tool" title="Recenter Map" id="recenter-map"><i
+                        class="fas fa-crosshairs"></i></button>
+                <div class="map-divider"></div>
+                <button class="map-btn map-tool active" title="Standard Map" id="layer-standard"><i
+                        class="fas fa-map"></i></button>
+                <button class="map-btn map-tool" title="Satellite Map" id="layer-sat"><i
+                        class="fas fa-satellite"></i></button>
+                <button class="map-btn map-tool" title="Price Heatmap" id="layer-heat"><i
+                        class="fas fa-fire"></i></button>
+            </div>
+
+            <div class="draw-controls">
+                <button class="map-btn map-tool draw-btn" title="Draw Land Boundary" id="btn-draw"><i
+                        class="fas fa-draw-polygon"></i></button>
+                <button class="map-btn map-tool draw-btn text-danger hidden" title="Clear Boundary" id="btn-clear"><i
+                        class="fas fa-trash"></i></button>
+            </div>
+
+            <!-- Animated Area Chip -->
+            <div class="area-chip floating-chip hidden" id="live-area-chip">
+                <span class="chip-dot"></span> Selected Area: <strong id="chip-area-val">--</strong> sq.ft
+            </div>
+        </section>
+
+
+        <!-- Right Panel: Input + Analytics (30-35%) -->
+        <aside class="analytics-panel">
+
+            <!-- Sticky Input Form Section -->
+            <div class="form-container">
+                <h2 class="form-title">Property Details</h2>
+
+                <div class="input-grid">
+                    <!-- Location Row -->
+                    <div class="input-field full-width">
+                        <label>Location <i class="fas fa-info-circle info-icon"
+                                title="Auto-filled from map selection"></i></label>
+                        <div class="input-combo">
+                            <input type="text" id="locality" placeholder="Select on map..." readonly>
+                            <span class="latlng-display" id="latlng-display">-- , --</span>
+                        </div>
+                    </div>
+
+                    <!-- Area & BHK Row -->
+                    <div class="input-field half">
+                        <label>Area (sq.ft) <i class="fas fa-info-circle info-icon"
+                                title="Draw polygon to auto-calculate"></i></label>
+                        <input type="number" id="area" placeholder="e.g. 1240" class="data-font">
+                    </div>
+                    <div class="input-field half">
+                        <label>BHK</label>
+                        <select id="bhk">
+                            <option>1</option>
+                            <option>2</option>
+                            <option selected>3</option>
+                            <option>4</option>
+                            <option>5</option>
+                            <option>6</option>
+                            <option>7</option>
+                            <option>8</option>
+                        </select>
+                    </div>
+
+                    <!-- Details Row -->
+                    <div class="input-field full-width">
+                        <label>Furnishing</label>
+                        <select id="furnishing">
+                            <option>Unfurnished</option>
+                            <option selected>Semi-Furnished</option>
+                            <option>Fully-Furnished</option>
+                        </select>
+                    </div>
+
+                    <!-- Details Row 4 -->
+                    <div class="input-field full-width">
+                        <label>Property Type</label>
+                        <select id="prop-type">
+                            <option>Apartment / Flat</option>
+                            <option>Independent House / Villa</option>
+                            <option>Builder Floor</option>
+                            <option>Residential Plot</option>
+                        </select>
+                    </div>
+
+                    <div class="input-field full-width">
+                        <label>Status</label>
+                        <select id="status">
+                            <option>Ready to Move</option>
+                            <option>Under Construction</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button class="cta-primary" id="analyze-btn">
+                    <span class="cta-text"><i class="fas fa-bolt"></i> Analyze Property</span>
+                    <div class="shimmer-loader hidden"></div>
+                </button>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" data-tab="price">Price Prediction</button>
+                <button class="tab-btn" data-tab="rent">Rental Insights</button>
+                <button class="tab-btn" data-tab="invest">Intelligence</button>
+            </div>
+
+            <!-- Results Views container -->
+            <div class="tab-content-container">
+
+                <!-- Tab 1: Price Prediction -->
+                <div class="tab-pane active" id="tab-price">
+                    <div class="result-card primary-result">
+                        <div class="result-header">Predicted Price</div>
+                        <div class="result-value coral-gradient" id="pred-price">--</div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-label">Price per sq.ft</span>
+                            <span class="metric-val data-font" id="pred-psf">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Avg Area Price</span>
+                            <span class="metric-val data-font" id="area-psf">--</span>
+                        </div>
+                    </div>
+
+                    <div class="confidence-box">
+                        <div class="conf-header">
+                            <span>Model Confidence</span>
+                            <span class="conf-val data-font"><span id="conf-score">--</span>%</span>
+                        </div>
+                        <div class="progress-bg">
+                            <div class="progress-fill fill-green" id="conf-bar"></div>
+                        </div>
+                    </div>
+
+                    <div class="comparables-section">
+                        <h4>History</h4>
+                        <div class="comp-list" id="history-list">
+                            <div class="comp-item"
+                                style="justify-content: center; color: var(--text-muted); border: none; background: transparent;">
+                                <span>No previous predictions yet.</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 2: Rental Insights -->
+                <div class="tab-pane" id="tab-rent">
+                    <div class="result-card primary-result">
+                        <div class="result-header">Estimated Monthly Rent</div>
+                        <div class="result-value navy-gradient" id="rent-price">--</div>
+                    </div>
+
+                    <div class="metrics-grid">
+                        <div class="metric-box">
+                            <span class="metric-label">Rent per sq.ft</span>
+                            <span class="metric-val data-font" id="rent-psf">--</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Rental Demand</span>
+                            <span class="badge badge-high"><i class="fas fa-circle"></i> High</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Expected Yield</span>
+                            <span class="metric-val data-font text-teal">3.8%</span>
+                        </div>
+                        <div class="metric-box">
+                            <span class="metric-label">Avg Area Rent</span>
+                            <span class="metric-val data-font">₹30k / mo</span>
+                        </div>
+                    </div>
+
+                    <div class="chart-box">
+                        <h4>12-Month Rental Trend</h4>
+                        <div class="chart-wrapper">
+                            <canvas id="rentalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tab 3: Intelligence -->
+                <div class="tab-pane" id="tab-invest">
+
+                    <div class="ai-insight-card">
+                        <div class="ai-header">
+                            <i class="fas fa-sparkles"></i> AI Investment Report
+                        </div>
+
+                        <div class="ai-badge-grid" style="display: flex; gap: 16px; margin: 16px 0;">
+                            <div class="report-item"
+                                style="flex: 1; text-align: center; padding: 12px; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.2);">
+                                <span class="report-label" style="font-size: 10px;">Prediction Confidence</span>
+                                <span class="report-val data-font text-teal" id="report-confidence"
+                                    style="font-size: 16px;">--%</span>
+                            </div>
+                            <div class="report-item"
+                                style="flex: 1; text-align: center; padding: 12px; background: rgba(30, 58, 138, 0.05); border-color: rgba(30, 58, 138, 0.2);">
+                                <span class="report-label" style="font-size: 10px;">Investment Rating</span>
+                                <span class="report-val data-font text-navy" id="report-rating"
+                                    style="font-size: 14px; text-transform: uppercase;">--</span>
+                            </div>
+                        </div>
+
+                        <p class="ai-text" id="report-insight">
+                            "Enter property details to generate a comprehensive investment analysis."
+                        </p>
+                    </div>
+
+                    <div class="report-section">
+                        <h4 class="report-section-title"><i class="fas fa-money-check-alt"></i> Purchase & Financing
+                        </h4>
+                        <div class="report-grid">
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Property Value
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Estimated market value predicted by our AI
+                                            valuation model based on historical sales data.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-prop-value">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Down Payment (20%)
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">The upfront cash required to purchase the property,
+                                            assumed at 20% of the property value.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-down-payment">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Loan Amount
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">The remaining 80% balance financed through a
+                                            mortgage.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-loan-amount">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Monthly EMI
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Estimated monthly mortgage payment assuming an 8.5%
+                                            interest rate over 25 years.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-monthly-emi">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-divider"></div>
+
+                    <div class="report-section">
+                        <h4 class="report-section-title"><i class="fas fa-hand-holding-usd"></i> Rental Economics</h4>
+                        <div class="report-grid">
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Monthly Rent
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Estimated monthly rental income predicted by our AI
+                                            rental model.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font text-teal" id="report-monthly-rent">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Gross Yield
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Annual rental income divided by the total predicted
+                                            property value.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font text-teal" id="report-gross-yield">--%</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Net Rent (5Y)
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Total income over 5 years (8% vacancy, 1%
+                                            maintenance, 5% annual growth).</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-net-rent-5y">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Net Cashflow (5Y)
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Net rent minus total EMI. Negative means paying out
+                                            of pocket.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-net-cashflow-5y">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-divider"></div>
+
+                    <div class="report-section">
+                        <h4 class="report-section-title"><i class="fas fa-chart-line"></i> 5-Year Exit Strategy</h4>
+                        <div class="report-grid">
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Future Value
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Estimated value after 5 years (6% annual
+                                            appreciation rate).</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-future-value">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Selling Cost (2%)
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Broker fees, taxes, and transaction costs when
+                                            exiting.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-selling-cost">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Net Sale Proceeds
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Final amount received after deducting selling costs
+                                            and mortgage balance.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font" id="report-net-sale">--</span>
+                            </div>
+                            <div class="report-item">
+                                <span class="report-label">
+                                    Capital Gain
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">The pure profit made purely from the property's
+                                            appreciation over 5 years.</span>
+                                    </span>
+                                </span>
+                                <span class="report-val data-font text-navy" id="report-capital-gain">--</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="report-summary-card">
+                        <h4 class="summary-title">Bottom Line ROI (5 Years)</h4>
+                        <div class="summary-grid">
+                            <div class="summary-box">
+                                <div class="summary-label">
+                                    Total Cash Invested
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip">Initial down payment + any negative cash flow
+                                            required.</span>
+                                    </span>
+                                </div>
+                                <div class="summary-val data-font" id="report-total-invested">--</div>
+                            </div>
+                            <div class="summary-box highlight">
+                                <div class="summary-label">
+                                    Total Net Profit
+                                    <span class="info-icon-wrapper">
+                                        <i class="fas fa-info-circle info-icon"></i>
+                                        <span class="custom-tooltip" style="bottom:unset; top:150%;">Total capital gain
+                                            + net rent - costs. The absolute take-home profit.</span>
+                                    </span>
+                                </div>
+                                <div class="summary-val data-font" id="report-total-profit">--</div>
+                            </div>
+                        </div>
+
+                        <div class="progress-section">
+                            <div class="conf-header">
+                                <span>Total Net Return</span>
+                                <span class="conf-val data-font" id="report-net-return-score">--%</span>
+                            </div>
+                            <div class="progress-bg">
+                                <div class="progress-fill fill-teal" id="report-net-return-bar" style="width: 0%"></div>
+                            </div>
+                        </div>
+
+                        <div class="break-even-pill">
+                            <i class="fas fa-balance-scale"></i> Realistic Break-even: <strong id="report-break-even">--
+                                yrs</strong>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </aside>
+
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.draw/1.0.4/leaflet.draw.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.heat/0.2.0/leaflet-heat.js"></script>
+    <script src="skyline.js"></script>
+    <script src="app.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initSkyline('skyline-container');
+        });
+    </script>
+</body>
+
+</html>
