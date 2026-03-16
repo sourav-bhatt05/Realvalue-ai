@@ -1,5 +1,5 @@
 /**
- * RealValue - Airbnb/Zillow Style Interactive JS
+ * RealValue 
  */
 
 const INITIAL_CENTER = [28.6139, 77.2090]; // Delhi NCR
@@ -521,11 +521,10 @@ function handleAnalysis() {
             }
 
             const targetPriceVal = data.price;
-            const targetRentVal = data.rent * areaVal; // Depending on if model outputs psf or total. Assume total for now, wait, the rental model output is rent. Let's assume the model predicted total rent. Wait, no, rental model predicts rent, the original data was total rent.
-            // Actually, let's just use data.rent as the predicted rent 
+            const targetRentVal = data.rent * areaVal; 
             const investment = data.investment_analysis;
 
-            const conf = data.confidence_score || (88 + Math.floor(Math.random() * 8)); // Fallback if backend failed
+            const conf = data.confidence_score || (88 + Math.floor(Math.random() * 8)); 
             const psf = Math.round(targetPriceVal / areaVal);
             const rentPsf = Math.round(data.rent / areaVal);
 
